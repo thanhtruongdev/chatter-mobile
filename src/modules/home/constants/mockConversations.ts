@@ -1,0 +1,56 @@
+import { ConversationPreview } from '../types/home.types';
+
+export const mockConversations: ConversationPreview[] = [
+  {
+    id: '1',
+    title: 'Alex Johnson',
+    messagePreview: 'Hey, are we still meeting today at the office?',
+    timeLabel: '9:15 AM',
+    unreadCount: 2,
+    isOnline: true,
+    avatarFallback: 'AJ',
+    avatarTone: 'primary',
+  },
+  {
+    id: '2',
+    title: 'Sarah Miller',
+    messagePreview: 'The new mocks are ready for review. Check inbox.',
+    timeLabel: 'Yesterday',
+    avatarFallback: 'SM',
+    avatarTone: 'text',
+  },
+  {
+    id: '3',
+    title: 'Design Team',
+    messagePreview: "David: Don't forget the sprint review notes.",
+    timeLabel: 'Tuesday',
+    unreadCount: 5,
+    avatarFallback: 'DT',
+    avatarTone: 'icon',
+  },
+  {
+    id: '4',
+    title: 'Robert Fox',
+    messagePreview: 'Sent a photo',
+    timeLabel: 'Mar 12',
+    hasImageAttachment: true,
+    avatarFallback: 'RF',
+    avatarTone: 'text',
+  },
+  {
+    id: '5',
+    title: 'Jane Cooper',
+    messagePreview: 'Perfect, thanks for the quick update!',
+    timeLabel: 'Mar 10',
+    avatarFallback: 'JC',
+    avatarTone: 'secondaryText',
+  },
+  {
+    id: '6',
+    title: 'Guy Hawkins',
+    messagePreview: 'See you tomorrow at the venue.',
+    timeLabel: 'Mar 08',
+    avatarFallback: 'GH',
+    avatarTone: 'primary',
+  },
+];

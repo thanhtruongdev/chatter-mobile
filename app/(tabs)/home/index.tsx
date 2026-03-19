@@ -1,10 +1,6 @@
-import React from "react";
-import { Text, View } from "react-native";
+import { HomeScreen } from '@/src/modules/home';
+import React from 'react';
 
 export default function HomeRoute() {
-    return (
-        <View className="flex-1 items-center justify-center">
-            <Text className="text-2xl font-bold">Home Screen</Text>
-        </View>
-    );
+    return <HomeScreen />;
 }

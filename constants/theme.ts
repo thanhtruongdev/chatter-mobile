@@ -13,6 +13,7 @@ export const Colors = {
     text: '#0F172A',
     secondaryText: '#64748B',
     primary: '#1C74E9',
+    success: '#22C55E',
     error: '#DC2626',
     background: '#FFFFFF',
     surface: '#F5F7FA', // Input backgrounds
@@ -26,6 +27,7 @@ export const Colors = {
     text: '#F8FAFC',
     secondaryText: '#94A3B8',
     primary: '#1C74E9',
+    success: '#22C55E',
     error: '#F87171',
     background: '#0F172A',
     surface: '#1E293B',
