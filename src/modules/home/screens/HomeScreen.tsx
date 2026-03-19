@@ -2,6 +2,7 @@ import { Colors } from '@/constants/theme';
 import { Menu, MessageSquareText, Search, SquarePen } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import {
+    ActivityIndicator,
     FlatList,
     Image,
     ListRenderItemInfo,
@@ -13,11 +14,12 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConversationListItem } from '../components/ConversationListItem';
-import { mockConversations } from '../constants/mockConversations';
+import { useConversations } from '../hooks/useConversations';
 import { ConversationPreview } from '../types/home.types';
 
 export const HomeScreen = () => {
     const insets = useSafeAreaInsets();
+    const { conversations, isLoading, isRefreshing, refreshConversations } = useConversations();
 
     const handleOpenConversation = useCallback((conversationId: string) => {
         // Placeholder until conversation detail route is available.
@@ -40,6 +42,10 @@ export const HomeScreen = () => {
     );
 
     const keyExtractor = useCallback((item: ConversationPreview) => item.id, []);
+
+    const handleRefresh = useCallback(() => {
+        void refreshConversations();
+    }, [refreshConversations]);
 
     return (
         <SafeAreaView
@@ -83,13 +89,26 @@ export const HomeScreen = () => {
                 <Text className="ml-3 text-lg" style={{ color: Colors.light.secondaryText }}>Search messages...</Text>
             </View>
 
-            <FlatList
-                data={mockConversations}
-                keyExtractor={keyExtractor}
-                renderItem={renderConversation}
-                contentContainerClassName="px-5 pb-[120px]"
-                showsVerticalScrollIndicator={false}
-            />
+            {isLoading ? (
+                <View className="flex-1 items-center justify-center">
+                    <ActivityIndicator size="small" color={Colors.light.primary} />
+                </View>
+            ) : (
+                <FlatList
+                    data={conversations}
+                    keyExtractor={keyExtractor}
+                    renderItem={renderConversation}
+                    onRefresh={handleRefresh}
+                    refreshing={isRefreshing}
+                    contentContainerClassName={`px-5 pb-[120px] ${conversations.length === 0 ? 'flex-1 items-center justify-center' : ''}`}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={(
+                        <Text className="text-base" style={{ color: Colors.light.secondaryText }}>
+                            No conversations yet.
+                        </Text>
+                    )}
+                />
+            )}
 
             <Pressable
                 className="absolute bottom-[28px] right-7 size-[56px] items-center justify-center rounded-full"

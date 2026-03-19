@@ -5,7 +5,7 @@
 This document is the single integration spec for mobile clients.
 It covers all currently implemented backend interfaces:
 
-1. HTTP APIs (Express): auth, conversation, health.
+1. HTTP APIs (Express): auth, conversation, friend requests/friendships, health.
 2. Realtime APIs (Socket.IO): auth fallback, join, history, send, typing.
 
 Goal: help mobile teams integrate correctly with minimal guesswork.
@@ -348,6 +348,12 @@ Error responses:
 
 Request body: none
 
+Response object notes:
+
+1. Each conversation now includes latestMessages as an array.
+2. latestMessages currently returns up to 1 newest message per conversation.
+3. This array shape is intentionally future-proof for multi-item previews.
+
 Success response (200):
 
 ```json
@@ -363,6 +369,17 @@ Success response (200):
 			"createdBy": "1",
 			"createdAt": "2026-03-19T09:00:00.000Z",
 			"updatedAt": "2026-03-19T09:10:00.000Z",
+			"latestMessages": [
+				{
+					"id": "102",
+					"senderId": "2",
+					"type": "file",
+					"content": "holiday_video.mp4",
+					"createdAt": "2026-03-19T09:09:30.000Z",
+					"contentCategory": "media",
+					"mediaType": "video"
+				}
+			],
 			"members": [
 				{
 					"userId": "1",
@@ -380,6 +397,28 @@ Success response (200):
 }
 ```
 
+latestMessages field contract:
+
+1. id: message id as string.
+2. senderId: sender user id as string.
+3. type: backend message type (text, image, file, system).
+4. content: message text or media caption/file name, nullable.
+5. createdAt: message timestamp in ISO 8601.
+6. contentCategory: text, media, or system.
+7. mediaType: image, video, audio, record, file, or null.
+
+Classification behavior for mobile rendering:
+
+1. If type=text -> contentCategory=text and mediaType=null.
+2. If type=system -> contentCategory=system and mediaType=null.
+3. If type=image -> contentCategory=media and mediaType=image.
+4. If type=file -> contentCategory=media and mediaType is resolved from metadata.mediaType first.
+5. If metadata.mediaType is missing for type=file, backend falls back to attachment mime*type:
+   5.1 image/* -> image
+   5.2 video/\_ -> video
+   5.3 audio/\* -> audio
+   5.4 otherwise -> file
+
 Ordering behavior:
 
 1. Sort by last_message_at desc.
@@ -391,6 +430,287 @@ Error responses:
 1. 400 Invalid user id in access token
 2. 401 Unauthorized
 3. 500 Internal server error
+
+---
+
+## 5.7 Send Friend Request
+
+1. Method: POST
+2. Path: /api/v1/friends/requests
+3. Auth: required (Bearer access token)
+
+Request body:
+
+```json
+{
+	"targetUserId": "2",
+	"message": "Let's connect"
+}
+```
+
+Validation rules:
+
+1. targetUserId: required numeric string.
+2. message: optional string, trimmed, max 300 chars.
+
+Business rules:
+
+1. current user cannot send request to self.
+2. target user must exist and not be soft-deleted.
+3. request is blocked if either side has user_blocks relation.
+4. request is blocked if users are already friends (active friendship).
+5. request is blocked if there is already a pending request between two users.
+
+Success response (201):
+
+```json
+{
+	"success": true,
+	"message": "Send friend request success",
+	"data": {
+		"id": "21",
+		"requesterId": "1",
+		"addresseeId": "2",
+		"status": "pending",
+		"message": "Let's connect",
+		"createdAt": "2026-03-19T11:00:00.000Z",
+		"actedAt": null
+	}
+}
+```
+
+Error responses:
+
+1. 400 Validation failed
+2. 400 Cannot send friend request to yourself
+3. 400 Invalid user id in access token
+4. 401 Unauthorized
+5. 403 User is blocked
+6. 404 Target user does not exist
+7. 409 Users are already friends
+8. 409 Friend request already pending
+9. 500 Internal server error
+
+---
+
+## 5.8 Accept Friend Request
+
+1. Method: PATCH
+2. Path: /api/v1/friends/requests/:requestId/accept
+3. Auth: required (Bearer access token)
+
+Path params:
+
+1. requestId: required numeric string.
+
+Business rules:
+
+1. request must exist and not be soft-deleted.
+2. only addressee is allowed to accept.
+3. request status must be pending.
+4. accepting request creates or restores active friendship for canonical user pair.
+
+Success response (200):
+
+```json
+{
+	"success": true,
+	"message": "Accept friend request success",
+	"data": {
+		"id": "21",
+		"requesterId": "1",
+		"addresseeId": "2",
+		"status": "accepted",
+		"message": "Let's connect",
+		"createdAt": "2026-03-19T11:00:00.000Z",
+		"actedAt": "2026-03-19T11:05:00.000Z"
+	}
+}
+```
+
+Error responses:
+
+1. 400 Validation failed
+2. 400 Friend request is not pending
+3. 400 Invalid user id in access token
+4. 401 Unauthorized
+5. 403 Only addressee can respond to this request
+6. 404 Friend request not found
+7. 500 Internal server error
+
+---
+
+## 5.9 Reject Friend Request
+
+1. Method: PATCH
+2. Path: /api/v1/friends/requests/:requestId/reject
+3. Auth: required (Bearer access token)
+
+Path params:
+
+1. requestId: required numeric string.
+
+Business rules:
+
+1. request must exist and not be soft-deleted.
+2. only addressee is allowed to reject.
+3. request status must be pending.
+
+Success response (200):
+
+```json
+{
+	"success": true,
+	"message": "Reject friend request success",
+	"data": {
+		"id": "21",
+		"requesterId": "1",
+		"addresseeId": "2",
+		"status": "rejected",
+		"message": "Let's connect",
+		"createdAt": "2026-03-19T11:00:00.000Z",
+		"actedAt": "2026-03-19T11:06:00.000Z"
+	}
+}
+```
+
+Error responses:
+
+1. 400 Validation failed
+2. 400 Friend request is not pending
+3. 400 Invalid user id in access token
+4. 401 Unauthorized
+5. 403 Only addressee can respond to this request
+6. 404 Friend request not found
+7. 500 Internal server error
+
+---
+
+## 5.10 Get Friend List
+
+1. Method: GET
+2. Path: /api/v1/friends
+3. Auth: required (Bearer access token)
+
+Request body: none
+
+Response notes:
+
+1. returns active friendships only (removed_at is null).
+2. each item represents friend profile from the opposite user in friendship pair.
+
+Success response (200):
+
+```json
+{
+	"success": true,
+	"message": "Get friend list success",
+	"data": [
+		{
+			"userId": "2",
+			"username": "alice",
+			"email": "alice@example.com",
+			"displayName": "Alice",
+			"avatarUrl": null,
+			"friendedAt": "2026-03-19T11:05:00.000Z"
+		}
+	]
+}
+```
+
+Error responses:
+
+1. 400 Invalid user id in access token
+2. 401 Unauthorized
+3. 500 Internal server error
+
+---
+
+## 5.11 Unfriend
+
+1. Method: DELETE
+2. Path: /api/v1/friends/:friendUserId
+3. Auth: required (Bearer access token)
+
+Path params:
+
+1. friendUserId: required numeric string.
+
+Business rules:
+
+1. current user cannot unfriend self.
+2. friendship must exist and be active.
+3. unfriend performs soft remove by setting removed_at and removed_by_id.
+
+Success response (200):
+
+```json
+{
+	"success": true,
+	"message": "Unfriend success",
+	"data": {
+		"unfriended": true
+	}
+}
+```
+
+Error responses:
+
+1. 400 Validation failed
+2. 400 Cannot unfriend yourself
+3. 400 Invalid user id in access token
+4. 401 Unauthorized
+5. 404 Friendship not found
+6. 500 Internal server error
+
+---
+
+## 5.12 Search Users for Friend Request
+
+1. Method: GET
+2. Path: /api/v1/friends/search
+3. Auth: required (Bearer access token)
+
+Query params:
+
+1. q: required string, search keyword matched against username and email.
+2. limit: optional numeric string, maximum result count, default 10.
+
+Behavior:
+
+1. returns only active users (deleted_at is null).
+2. excludes current authenticated user.
+3. each result includes searchStatus for UI action state:
+   3.1 can_send: request can be sent.
+   3.2 already_friends: active friendship exists.
+   3.3 request_pending: pending friend request exists between two users.
+   3.4 blocked: users are blocked by user_blocks rule.
+
+Success response (200):
+
+```json
+{
+	"success": true,
+	"message": "Search users success",
+	"data": [
+		{
+			"userId": "2",
+			"username": "alice",
+			"email": "alice@example.com",
+			"displayName": "Alice",
+			"avatarUrl": null,
+			"searchStatus": "can_send"
+		}
+	]
+}
+```
+
+Error responses:
+
+1. 400 Validation failed
+2. 400 Invalid user id in access token
+3. 401 Unauthorized
+4. 500 Internal server error
 
 ---
 
@@ -708,7 +1028,17 @@ Common errors:
 9. One or more members do not exist
 10. memberIds must not include current user id
 11. Invalid user id in access token
-12. Internal server error
+12. Cannot send friend request to yourself
+13. Cannot unfriend yourself
+14. Users are already friends
+15. Friend request already pending
+16. User is blocked
+17. Target user does not exist
+18. Friend request not found
+19. Friend request is not pending
+20. Only addressee can respond to this request
+21. Friendship not found
+22. Internal server error
 
 ## 7.2 Realtime Error Codes and Messages (current)
 
@@ -759,6 +1089,12 @@ Common errors:
 8. Verify message:new received on second client.
 9. Verify message:typing ON and OFF on second client.
 10. Verify reconnect and token-expired behavior.
+11. Send friend request success path.
+12. Send friend request duplicate pending path (409).
+13. Accept friend request by addressee success path.
+14. Reject friend request by addressee success path.
+15. Get friend list after accept request.
+16. Unfriend success and verify friend list no longer contains that user.
 
 ---
 

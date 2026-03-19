@@ -78,6 +78,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     }
 
     const refreshUrl = `${resolvedBaseUrl}/auth/refresh-token`;
+    console.log('Attempting to refresh access token...', resolvedBaseUrl, refreshUrl);
     const response = await axios.post<ApiResponseEnvelope<RefreshTokenResponseData>>(refreshUrl, {
       refreshToken,
     });
@@ -85,6 +86,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     const nextAccessToken = response.data.data.accessToken;
     const nextRefreshToken = response.data.data.refreshToken;
 
+    console.log('Access token refreshed successfully.', nextAccessToken);
     await Promise.all([
       SecureStore.setItemAsync(AUTH_ACCESS_TOKEN_STORAGE_KEY, nextAccessToken),
       SecureStore.setItemAsync(AUTH_REFRESH_TOKEN_STORAGE_KEY, nextRefreshToken),
@@ -146,6 +148,9 @@ api.interceptors.response.use(
   async (error: AxiosError<ApiResponseEnvelope<unknown>>) => {
     const status = error.response?.status;
     const originalConfig = error.config as RetryableRequestConfig | undefined;
+
+    console.log("Status:", status);
+    console.log("Original Config:", originalConfig);
 
     const shouldTryRefresh = status === 401
       && !!originalConfig
