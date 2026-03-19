@@ -40,6 +40,18 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "extraProguardRules": "",
+            "manifestApplicationAttributes": {
+              "android:networkSecurityConfig": "@xml/network_security_config"
+            }
+          }
+        }
       ]
     ],
     "experiments": {

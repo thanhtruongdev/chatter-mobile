@@ -1,22 +1,42 @@
 import { Colors } from '@/constants/theme';
-import React from 'react';
+import { router } from 'expo-router';
+import React, { useCallback } from 'react';
 import { Image, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LoginForm } from '../components/LoginForm';
 import { SocialAuthButton } from '../components/SocialAuthButton';
+import { useAuth } from '../hooks/useAuth';
 import { LoginFormValues } from '../schemas/auth.schems';
 
 export const LoginScreen = () => {
   const insets = useSafeAreaInsets();
+  const { login, isLoggingIn, clearAuthError } = useAuth();
 
-  const handleLogin = (values: LoginFormValues) => {
-    // Implement login logic with validated values
-    void values;
-  };
+  const handleLogin = useCallback(async (values: LoginFormValues) => {
+    const session = await login(values);
 
-  const handleSocialLogin = (provider: 'google' | 'apple') => {
+    if (session) {
+      router.replace('/(tabs)/home');
+    }
+  }, [login]);
+
+  const handleSocialLogin = useCallback((provider: 'google' | 'apple') => {
     // Implement social login logic
-  };
+    void provider;
+  }, []);
+
+  const navigateToSignUp = useCallback(() => {
+    clearAuthError();
+    router.push('/(auth)/register');
+  }, [clearAuthError]);
+
+  const handleGoogleLogin = useCallback(() => {
+    handleSocialLogin('google');
+  }, [handleSocialLogin]);
+
+  const handleAppleLogin = useCallback(() => {
+    handleSocialLogin('apple');
+  }, [handleSocialLogin]);
 
   return (
     <SafeAreaView
@@ -52,7 +72,7 @@ export const LoginScreen = () => {
           </View>
 
           {/* Form Section */}
-          <LoginForm onSubmit={handleLogin} />
+          <LoginForm onSubmit={handleLogin} isLoggingIn={isLoggingIn} />
 
           {/* Divider */}
           <View className="my-8 flex-row items-center">
@@ -68,19 +88,22 @@ export const LoginScreen = () => {
 
           {/* Social Buttons */}
           <View className="-mx-2 flex-row justify-between">
-            <SocialAuthButton provider="google" onPress={() => handleSocialLogin('google')} />
-            <SocialAuthButton provider="apple" onPress={() => handleSocialLogin('apple')} />
+            <SocialAuthButton provider="google" onPress={handleGoogleLogin} />
+            <SocialAuthButton provider="apple" onPress={handleAppleLogin} />
           </View>
 
           {/* Footer */}
           <View className="mt-12 flex-row justify-center">
-            <Text className="text-sm" style={{ color: Colors.light.secondaryText }}>
+            <Text className="text-md" style={{ color: Colors.light.secondaryText }}>
               Don't have an account?{' '}
             </Text>
-            <TouchableOpacity>
-              <Text className="text-sm font-bold" style={{ color: Colors.light.primary }}>
-                Create Account
-              </Text>
+            <TouchableOpacity
+              onPress={navigateToSignUp}
+              accessibilityRole="button"
+              accessibilityLabel="Sign Up"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text className="text-md font-bold" style={{ color: Colors.light.primary }}>Sign Up</Text>
             </TouchableOpacity>
           </View>
 
