@@ -1,5 +1,5 @@
 import { Colors } from '@/constants/theme';
-import { Menu, Search as SearchIcon, Share2, UserRound } from 'lucide-react-native';
+import { Search as SearchIcon, Share2 } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import {
     ActivityIndicator,
@@ -27,14 +27,6 @@ export const SearchScreen = () => {
         sendFriendRequest,
         submittingUserIds,
     } = useUserSearch();
-
-    const handleOpenMenu = useCallback(() => {
-        // Placeholder until drawer or side menu is available.
-    }, []);
-
-    const handleOpenProfile = useCallback(() => {
-        // Placeholder until profile screen is available.
-    }, []);
 
     const handleSendInvite = useCallback(() => {
         // Placeholder until invite contacts flow is available.
@@ -69,55 +61,33 @@ export const SearchScreen = () => {
                 paddingTop: Platform.OS === 'android' ? insets.top : 0,
             }}
         >
-            <View className="h-16 flex-row items-center justify-between border-b px-3" style={{ borderBottomColor: Colors.light.border }}>
-                <Pressable
-                    className="size-11 items-center justify-center"
-                    onPress={handleOpenMenu}
-                    accessibilityRole="button"
-                    accessibilityLabel="Open menu"
-                >
-                    <Menu color={Colors.light.secondaryText} size={24} />
-                </Pressable>
-
-                <Text className="text-[54px] font-extrabold" style={{ color: Colors.light.primary }}>Chatter</Text>
-
-                <Pressable
-                    className="size-11 items-center justify-center rounded-full"
-                    style={{ backgroundColor: Colors.light.surface }}
-                    onPress={handleOpenProfile}
-                    accessibilityRole="button"
-                    accessibilityLabel="Open profile"
-                >
-                    <UserRound color={Colors.light.icon} size={20} />
-                </Pressable>
-            </View>
 
             <FlatList
                 data={users}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
-                contentContainerClassName={`px-5 pb-8 ${users.length === 0 ? 'min-h-[400px]' : ''}`}
+                contentContainerClassName={`px-5 pb-4 ${users.length === 0 ? 'min-h-[400px]' : ''}`}
                 keyboardShouldPersistTaps="handled"
                 ListHeaderComponent={(
-                    <View className="pb-5 pt-6">
+                    <View className="pb-5">
                         <Text className="mb-1 text-xl font-extrabold" style={{ color: Colors.light.text }}>Find your people</Text>
-                        <Text className="text-[17px]" style={{ color: Colors.light.secondaryText }}>Search for friends by name or username</Text>
+                        <Text className="text-sm" style={{ color: Colors.light.secondaryText }}>Search for friends by name or username</Text>
 
-                        <View className="mt-6 flex-row items-center rounded-[22px] border px-5 py-4" style={{ borderColor: Colors.light.border, backgroundColor: Colors.light.background }}>
-                            <SearchIcon size={28} color={Colors.light.secondaryText} />
+                        <View className="mt-4 flex-row items-center rounded-full border px-5" style={{ borderColor: Colors.light.border, backgroundColor: Colors.light.background }}>
+                            <SearchIcon size={20} color={Colors.light.secondaryText} />
                             <TextInput
                                 value={keyword}
                                 onChangeText={handleChangeSearch}
                                 placeholder="Search users..."
                                 placeholderTextColor={Colors.light.secondaryText}
-                                className="ml-3 flex-1 text-[17px]"
+                                className="ml-2 flex-1 text-lg"
                                 style={{ color: Colors.light.text }}
                                 autoCapitalize="none"
                                 autoCorrect={false}
                             />
                         </View>
 
-                        <Text className="mt-7 text-[12px] font-bold tracking-[1px]" style={{ color: Colors.light.secondaryText }}>
+                        <Text className="mt-4 text-sm font-bold tracking-[1px]" style={{ color: Colors.light.secondaryText }}>
                             RECOMMENDED
                         </Text>
 
@@ -141,24 +111,24 @@ export const SearchScreen = () => {
                     </View>
                 )}
                 ListFooterComponent={(
-                    <View className="mt-2 rounded-[28px] px-6 py-8" style={{ backgroundColor: Colors.light.surface }}>
-                        <View className="mb-6 size-20 self-center items-center justify-center rounded-full" style={{ backgroundColor: Colors.light.background }}>
+                    <View className="mt-4 flex gap-1 rounded-3xl px-6 py-8" style={{ backgroundColor: Colors.light.surface }}>
+                        <View className="size-20 self-center items-center justify-center rounded-full" style={{ backgroundColor: Colors.light.background }}>
                             <Share2 size={28} color={Colors.light.primary} />
                         </View>
-                        <Text className="mb-3 text-center text-[22px] font-extrabold" style={{ color: Colors.light.text }}>
+                        <Text className="text-center text-lg font-extrabold" style={{ color: Colors.light.text }}>
                             Can't find them?
                         </Text>
-                        <Text className="mb-7 text-center text-[16px]" style={{ color: Colors.light.secondaryText }}>
+                        <Text className="text-center text-md" style={{ color: Colors.light.secondaryText }}>
                             Invite your contacts to join Chatter and start the conversation.
                         </Text>
                         <Pressable
-                            className="self-center rounded-full border px-10 py-4"
+                            className="self-center rounded-full border px-10 py-2 mt-2"
                             style={{ borderColor: Colors.light.primary }}
                             onPress={handleSendInvite}
                             accessibilityRole="button"
                             accessibilityLabel="Send invite"
                         >
-                            <Text className="text-[17px] font-bold" style={{ color: Colors.light.primary }}>Send Invite</Text>
+                            <Text className="text-lg font-bold" style={{ color: Colors.light.primary }}>Send Invite</Text>
                         </Pressable>
                     </View>
                 )}

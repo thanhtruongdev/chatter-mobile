@@ -19,7 +19,7 @@ Before writing any code, the agent must:
    - Expo managed / Expo bare / bare React Native CLI
    - Navigation library: `react-navigation` v6+, `expo-router`, or other
    - State management: Redux Toolkit, Zustand, Jotai, Context API, etc.
-   - Styling approach: NativeWind, `styled-components`, etc.
+   - Styling approach: NativeWind.
    - UI library: `react-native-paper`, `gluestack-ui`, custom, etc.
 4. Read all relevant config files:
    - `tsconfig.json`

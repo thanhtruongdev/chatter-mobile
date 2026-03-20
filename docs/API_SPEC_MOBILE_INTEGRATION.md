@@ -714,6 +714,62 @@ Error responses:
 
 ---
 
+## 5.13 Get Pending Friend Requests
+
+1. Method: GET
+2. Path: /api/v1/friends/requests/pending
+3. Auth: required (Bearer access token)
+
+Query params:
+
+1. limit: optional numeric string, maximum result count, default 20.
+
+Behavior:
+
+1. returns only friend requests with status=pending and deleted_at is null.
+2. returns requests where current user is requester or addressee.
+3. direction indicates current user perspective:
+   3.1 incoming: current user is addressee.
+   3.2 outgoing: current user is requester.
+4. counterpart contains the opposite user profile for direct rendering in mobile request list.
+
+Success response (200):
+
+```json
+{
+	"success": true,
+	"message": "Get pending friend requests success",
+	"data": [
+		{
+			"id": "21",
+			"requesterId": "1",
+			"addresseeId": "2",
+			"status": "pending",
+			"message": "Let's connect",
+			"createdAt": "2026-03-20T08:00:00.000Z",
+			"actedAt": null,
+			"direction": "outgoing",
+			"counterpart": {
+				"userId": "2",
+				"username": "alice",
+				"email": "alice@example.com",
+				"displayName": "Alice",
+				"avatarUrl": null
+			}
+		}
+	]
+}
+```
+
+Error responses:
+
+1. 400 Validation failed
+2. 400 Invalid user id in access token
+3. 401 Unauthorized
+4. 500 Internal server error
+
+---
+
 ## 6. Realtime API Specification (Socket.IO)
 
 ## 6.1 Connection and Auth
@@ -1095,6 +1151,7 @@ Common errors:
 14. Reject friend request by addressee success path.
 15. Get friend list after accept request.
 16. Unfriend success and verify friend list no longer contains that user.
+17. Get pending friend requests and verify both incoming and outgoing directions.
 
 ---
 

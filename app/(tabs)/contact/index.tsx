@@ -1,10 +1,6 @@
-import React from "react";
-import { Text, View } from "react-native";
+import { ContactScreen } from '@/src/modules/contact';
+import React from 'react';
 
-export default function HomeRoute() {
-    return (
-        <View className="flex-1 items-center justify-center">
-            <Text className="text-2xl font-bold">Contact Screen</Text>
-        </View>
-    );
-}
+const ContactRoute = () => <ContactScreen />;
+
+export default ContactRoute;

@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/theme';
+import { useRouter } from 'expo-router';
 import { Menu, MessageSquareText, Search, SquarePen } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import {
@@ -18,13 +19,16 @@ import { useConversations } from '../hooks/useConversations';
 import { ConversationPreview } from '../types/home.types';
 
 export const HomeScreen = () => {
+    const router = useRouter();
     const insets = useSafeAreaInsets();
     const { conversations, isLoading, isRefreshing, refreshConversations } = useConversations();
 
     const handleOpenConversation = useCallback((conversationId: string) => {
-        // Placeholder until conversation detail route is available.
-        void conversationId;
-    }, []);
+        router.push({
+            pathname: '/chat/[conversationId]',
+            params: { conversationId },
+        });
+    }, [router]);
 
     const handleOpenMenu = useCallback(() => {
         // Placeholder until drawer or side menu is available.

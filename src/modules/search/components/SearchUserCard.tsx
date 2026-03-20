@@ -41,21 +41,21 @@ export const SearchUserCard: FC<SearchUserCardProps> = ({ user, isSubmitting, on
     };
 
     return (
-        <View className="mb-3 rounded-[24px] border p-4" style={{ borderColor: Colors.light.border, backgroundColor: Colors.light.background }}>
+        <View className="mb-2 rounded-3xl border p-2" style={{ borderColor: Colors.light.border, backgroundColor: Colors.light.background }}>
             <View className="flex-row items-center">
-                <View className="mr-4 size-16 items-center justify-center rounded-[20px]" style={{ backgroundColor: Colors.light.surface }}>
+                <View className="mr-4 size-16 items-center justify-center rounded-2xl" style={{ backgroundColor: Colors.light.surface }}>
                     <Text className="text-lg font-semibold" style={{ color: Colors.light.text }}>{initials}</Text>
                 </View>
 
                 <View className="flex-1 pr-3">
-                    <Text className="text-[20px] font-bold" style={{ color: Colors.light.text }}>{user.title}</Text>
-                    <Text className="text-[16px]" style={{ color: Colors.light.secondaryText }}>{user.subtitle}</Text>
+                    <Text className="text-lg font-bold truncate" style={{ color: Colors.light.text }}>{user.title}</Text>
+                    <Text className="text-md" style={{ color: Colors.light.secondaryText }}>{user.subtitle}</Text>
                 </View>
 
                 <Pressable
                     onPress={handlePress}
                     disabled={!isActionEnabled}
-                    className="min-w-[132px] items-center justify-center rounded-full px-5 py-3"
+                    className="mr-2 items-center justify-center rounded-xl px-5 py-1"
                     style={{
                         backgroundColor: isActionEnabled ? Colors.light.primary : Colors.light.surface,
                     }}
@@ -64,7 +64,7 @@ export const SearchUserCard: FC<SearchUserCardProps> = ({ user, isSubmitting, on
                     accessibilityState={{ disabled: !isActionEnabled }}
                 >
                     <Text
-                        className="text-[18px] font-bold"
+                        className="text-sm font-bold"
                         style={{ color: isActionEnabled ? Colors.light.background : Colors.light.secondaryText }}
                     >
                         {buttonLabel}
